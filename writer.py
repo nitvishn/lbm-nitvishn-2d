@@ -16,7 +16,7 @@ def plot_velocities(X, Y, u, v):
     plt.show()
 
 
-def array_to_png(data, output_filename, repeat=3):
+def array_to_png(data, output_filename, repeat=1):
 
     # Repeat the data array in both dimensions
     new_data = np.zeros((data.shape[0] * repeat, data.shape[1] * repeat))
@@ -29,11 +29,8 @@ def array_to_png(data, output_filename, repeat=3):
 
     data = np.flipud(data)  # Flip the data array vertically to match the PNG format
     # Define the color mapping from 0 (white) to 1 (dark ink blue)
-    # color_0 = np.array([67, 85, 159])  # RGB for 0
-    # color_1 = np.array([(195, 201, 220)])  # RGB for 1
-
-    color_0 = np.array([173, 5, 245])  # RGB for 0
-    color_1 = np.array([255, 234, 0])  # RGB for 1
+    color_0 = np.array([67, 85, 159])  # RGB for 0
+    color_1 = np.array([(195, 201, 220)])  # RGB for 1
     
     color_0_arr = np.tile(color_0, (data.shape[0], data.shape[1], 1))
     color_1_arr = np.tile(color_1, (data.shape[0], data.shape[1], 1))
