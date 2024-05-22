@@ -1,18 +1,21 @@
 import numpy as np
 
-from constants import w, Nl, cx, cy
+from constants import w, Nl
 
-def compute_feq(rho, u, v, normalize=True):
-    nx, ny = u.shape
-    feq = np.zeros((nx, ny, Nl), dtype=np.float64)
-    u_sq = u ** 2 + v ** 2
-    for vel_direction in range(Nl):
-        cu = cx[vel_direction] * u + cy[vel_direction] * v
-        feq[:, :, vel_direction] += rho * w[vel_direction] * (1 + 3 * cu + 9 / 2 * cu ** 2 - 3 / 2 * u_sq)
+def compute_feq(rho, u, v, cx, cy, c_s, normalize=False):
+    # Use a fourth order expansion for the equilibrium distribution
+
+    # Compute the equilibrium distribution
+    Feq = np.zeros((u.shape[0], u.shape[1], Nl), dtype=np.float64)
+    for i in range(Nl):
+        cu = cx[i] * u + cy[i] * v
+        Feq[:, :, i] = rho * w[i] * ( 1 
+                                  + cu / c_s**2
+                                    + 0.5 * (cu / c_s**2)**2
+                                    - 0.5 * (u**2 + v**2) / c_s**2)
 
     if normalize:
-        rho_eq = np.sum(feq, axis=2)
-        for l in range(Nl):
-            feq[:, :, l] *= rho / rho_eq
+        # Normalize the equilibrium distribution
+        Feq /= np.sum(Feq, axis=2)[:, :, np.newaxis]
 
-    return feq
+    return Feq

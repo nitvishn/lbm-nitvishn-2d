@@ -114,7 +114,7 @@ def advect(new_q: GridQuantity, u: GridQuantity, v: GridQuantity, dt: float, q: 
     Semi-Lagrangian advection is used, which means that the
     velocity field is used to trace back in time where the
     quantity q came from.
-
+    
     STORES THE RESULT IN new_q.
     """
 

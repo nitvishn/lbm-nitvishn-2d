@@ -2,11 +2,11 @@ import cv2
 import os
 import re 
 
-date = 'may_8'
+date = 'may_22'
 # Directory containing frames
 input_dir = 'output/frames/'
 # Output video file
-output_file = f'{date}/merged.mov'
+output_file = f'daylogs/{date}/merged.mov'
 # Frame rate
 fps = 24
 
