@@ -5,10 +5,12 @@ Setup various initial conditions for the simulation.
 from lbm_helpers import compute_feq
 from grid_quantity import GridQuantity
 import numpy as np
-from constants import u_max_upperbound
+from sim_variables import SimulationVariables
 
 
 def setup_cos_cos(nx: int, ny: int, cx, cy, rho_0: np.float64 = 1.0):
+
+    # BROKEN PLEASE FIX THIS
     u = np.zeros((nx, ny), dtype=np.float64)
     v = np.zeros((nx, ny), dtype=np.float64)
 
@@ -20,8 +22,6 @@ def setup_cos_cos(nx: int, ny: int, cx, cy, rho_0: np.float64 = 1.0):
     u, v = u * 0.01, v * 0.01
 
     u_max = np.sqrt(np.max(u**2 + v**2)) + 1e-6
-    v *= u_max_upperbound / u_max
-    u *= u_max_upperbound / u_max
 
     f = compute_feq(rho_0, u, v, cx, cy)
 
@@ -44,60 +44,6 @@ def setup_cos_cos(nx: int, ny: int, cx, cy, rho_0: np.float64 = 1.0):
     # print(f"Max v: {np.max(v)}, Min v: {np.min(v)}")
 
     return f, ink
-
-
-
-def setup_kelvin_helmholtz(resolution: int):
-    """
-    I want to set this up so that the simulation happens in a unit square, 
-    in meters. 
-    We are in AIR, so the speed of sound is 343 m/s, 
-    and the kinematic viscosity is 1.5e-5 m^2/s.
-    """
-
-    horizontal_velocity = 8.0 # m/s
-    vertical_velocity = 0.1 # m/s, then we'll multiply by sin(x)
-    density = 1.293 / 165 # kg/m^3
-
-    l_ref = 1.0 # m
-    
-    rho_ref = 1.0 # kg/m^3
-    
-    speed_of_sound = 343.0 # m/s
-    kinematic_viscosity = 1.5e-5  # kinematic viscosity, m^2/s
-
-    # u_ref = 2 * np.linalg.norm([horizontal_velocity, vertical_velocity]) # m/s
-    u_ref = speed_of_sound / 2.0
-
-    Re = u_ref * l_ref / kinematic_viscosity
-
-    print(f"Reynolds number: {Re}")
-
-    delta_x = l_ref / resolution
-
-    x_arr, y_arr, = np.meshgrid(np.arange(0, 1, delta_x), np.arange(0, 1, delta_x), indexing='ij')
-    nx, ny = x_arr.shape
-
-    layer = np.logical_and(y_arr >= 0.25, y_arr <= 0.75)
-
-    u = np.zeros((nx, ny), dtype=np.float64) 
-    v = np.zeros((nx, ny), dtype=np.float64)
-    u[layer] = horizontal_velocity
-    u[~layer] = -horizontal_velocity
-
-    for i in range(nx):
-        for j in range(ny):
-            x, y = x_arr[i, j], y_arr[i, j]
-            v[i, j] = vertical_velocity * np.sin(4 * np.pi * x)
-
-    ink = GridQuantity(nx, ny, 0, 0, periodic=True)
-    ink.quantity[layer] = 1.0
-
-    rho = np.ones((nx, ny), dtype=np.float64) * density
-
-    return u, v, rho, kinematic_viscosity, ink, rho_ref, u_ref, l_ref, speed_of_sound, delta_x
-
-
 
 
 def setup_kelvin_helmholtz_rotated(nx: int, ny: int, cx, cy, rho_0: np.float64 = 1.0):
@@ -149,7 +95,7 @@ def setup_kelvin_helmholtz_rotated(nx: int, ny: int, cx, cy, rho_0: np.float64 =
 
 
 
-def setup_kelvin_helmholtz_no_unit_conversion(resolution: int):
+def setup_kelvin_helmholtz(resolution: int):
     """
     I want to set this up so that the simulation happens in a unit square, 
     in meters. 
@@ -157,20 +103,19 @@ def setup_kelvin_helmholtz_no_unit_conversion(resolution: int):
     and the kinematic viscosity is 1.5e-5 m^2/s.
     """
 
-    horizontal_velocity = 0.2 # m/s
-    vertical_velocity = 0.01 # m/s, then we'll multiply by sin(x)
-    density = 1.0 # kg/m^3
+    horizontal_velocity = 8.0 # m/s
+    vertical_velocity = 0.1 # m/s, then we'll multiply by sin(x)
+    density = 1000.0 # kg/m^3
 
     l_ref = 1.0 # metres
-    t_ref = 0.1 # seconds, the timescale of the simulation
     
-    rho_ref = 1.0 # kg/m^3
+    rho_ref = 1000.0 # kg/m^3
     
-    speed_of_sound = 343.0 # m/s
-    kinematic_viscosity = 1.5e-5  # kinematic viscosity, m^2/s
+    speed_of_sound = 1500.0 # m/s
+    kinematic_viscosity = 1002.0 * 1e-6  # kinematic viscosity, m^2/s
 
     # u_ref = 2 * np.linalg.norm([horizontal_velocity, vertical_velocity]) # m/s
-    u_ref = 2 * horizontal_velocity
+    u_ref = (horizontal_velocity ** 2 + vertical_velocity ** 2) ** 0.5
 
     Re = u_ref * l_ref / kinematic_viscosity
     print(f"Reynolds number: {Re}")
@@ -199,4 +144,8 @@ def setup_kelvin_helmholtz_no_unit_conversion(resolution: int):
 
     rho = np.ones((nx, ny), dtype=np.float64) * density
 
-    return u, v, rho, kinematic_viscosity, ink, rho_ref, u_ref, l_ref, speed_of_sound, delta_x
+    physical_vars = SimulationVariables(l_ref, u_ref, rho_ref, speed_of_sound, kinematic_viscosity, delta_x)
+    physical_vars.set_space(x_arr, y_arr, rho)
+    physical_vars.set_velocity(u, v)
+
+    return physical_vars, ink

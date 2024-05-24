@@ -1,8 +1,10 @@
 import numpy as np
 
-from constants import w, Nl
+from constants import w, Nl, cx, cy
 
-def compute_feq(rho, u, v, cx, cy, c_s, normalize=False):
+from sim_variables import LatticeVariables
+
+def compute_feq(rho, u, v, c_s):
     # Use a fourth order expansion for the equilibrium distribution
 
     # Compute the equilibrium distribution
@@ -13,9 +15,5 @@ def compute_feq(rho, u, v, cx, cy, c_s, normalize=False):
                                   + cu / c_s**2
                                     + 0.5 * (cu / c_s**2)**2
                                     - 0.5 * (u**2 + v**2) / c_s**2)
-
-    if normalize:
-        # Normalize the equilibrium distribution
-        Feq /= np.sum(Feq, axis=2)[:, :, np.newaxis]
 
     return Feq

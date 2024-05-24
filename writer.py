@@ -33,8 +33,8 @@ def array_to_png(data, output_filename, repeat=1, low=0.0, high=1.0):
 
     data = np.flipud(data)  # Flip the data array vertically to match the PNG format
     # Define the color mapping from 0 (white) to 1 (dark ink blue)
-    color_0 = np.array([114, 27, 228])  # RGB for 0
-    color_1 = np.array([141, 228, 27])  # RGB for 1
+    color_0 = np.array([50, 0, 13])  # RGB for 0
+    color_1 = np.array([61, 132, 113])  # RGB for 1
     
     color_0_arr = np.tile(color_0, (data.shape[0], data.shape[1], 1))
     color_1_arr = np.tile(color_1, (data.shape[0], data.shape[1], 1))
