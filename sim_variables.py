@@ -40,8 +40,8 @@ class SimulationVariables(object):
 
 class LatticeVariables(object):
     def __init__(self, physical_variables: SimulationVariables) -> None:
-        self.speed_of_sound = 1.0 / np.sqrt(3)
-        self.u_ref = 0.2 # Stays fixed throughout the simulation, according to LBM paper
+        self.speed_of_sound = np.float64(1.0 / np.sqrt(3))
+        self.u_ref = np.float64(0.2) # Stays fixed throughout the simulation, according to LBM paper
         
         self.set_from_physical(physical_variables)
 
