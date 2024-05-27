@@ -4,3 +4,4 @@ output/frames/*
 output/frames
 output
 outputs
+__pycache__/
